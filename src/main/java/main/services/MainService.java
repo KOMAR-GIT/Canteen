@@ -5,6 +5,7 @@ import main.model.RegisterEvents;
 import main.model.Staff;
 import main.repositories.RegisterEventsRepository;
 import main.repositories.StaffRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -14,35 +15,52 @@ import java.awt.print.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MainService {
 
     private final RegisterEventsRepository registerEventsRepository;
     private final StaffRepository staffRepository;
+    @Value("${validator_id}")
+    private int validatorId;
+//    private List<RegisterEvents> printedEvents;
 
     public MainService(StaffRepository staffRepository, RegisterEventsRepository registerEventsRepository) {
         this.registerEventsRepository = registerEventsRepository;
         this.staffRepository = staffRepository;
+//        printedEvents = new ArrayList<>();
     }
 
     //Получаем данные человека, которому нужно распечатать чек
-    public Boolean getPrintablePerson(Date timestamp) throws IOException {
-        Date date = new Date(2021, Calendar.APRIL,26,12,26,0);
-        Timestamp timestamp1 = new Timestamp(121,3,26,12,26,0,0);
-        Timestamp timestamp2 = new Timestamp(timestamp1.getTime()).setSeconds(timestamp1.getSeconds() + 1);timestamp1.setSeconds(timestamp1.getSeconds() + 1);
-        List<Optional<RegisterEvents>> registerEvents = registerEventsRepository.getEvents(101310,);
-        String staffName = "";
-        if (registerEvents.get(0).isPresent()) {
+    public Boolean getPrintablePerson(Timestamp timestamp) throws IOException {
+        List<Optional<RegisterEvents>> registerEvents =
+                registerEventsRepository.getEvents(
+                        validatorId,
+                        getCorrectTimestamp(timestamp, false),
+                        getCorrectTimestamp(timestamp, true));
+        if (!registerEvents.isEmpty()) {
             Integer staff_id = registerEvents.get(0).get().getStaffId();
-            staffName = staffRepository.findById(staff_id).get().getShortFio();
-            sendToPrint(new Person(staffName, timestamp));
+            String staffName = staffRepository.findById(staff_id).get().getShortFio();
+//            sendToPrint(new Person(staffName, timestamp));
         }
+        System.out.println("не печатаю. Время: " + timestamp);
         return true;
+    }
+
+    private String getCorrectTimestamp(Timestamp timestamp, boolean addOneSecond) {
+        Timestamp finalTimestamp;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp.getTime());
+        if (addOneSecond) {
+            calendar.add(Calendar.SECOND, 1);
+        } else {
+            calendar.add(Calendar.SECOND,-2);
+        }
+        finalTimestamp = new Timestamp(calendar.getTime().getTime());
+        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(finalTimestamp);
     }
 
     public boolean sendToPrint(Person person) throws IOException {

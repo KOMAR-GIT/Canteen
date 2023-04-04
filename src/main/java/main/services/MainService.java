@@ -13,7 +13,10 @@ import java.awt.image.BufferedImage;
 import java.awt.print.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,32 +31,32 @@ public class MainService {
     }
 
     //Получаем данные человека, которому нужно распечатать чек
-    Boolean getPrintablePerson(Date timestamp) throws IOException {
-        Optional<RegisterEvents> registerEvents = registerEventsRepository.findByLastTimestamp(timestamp);
+    public Boolean getPrintablePerson(Date timestamp) throws IOException {
+        Date date = new Date(2021, Calendar.APRIL,26,12,26,0);
+        Timestamp timestamp1 = new Timestamp(121,3,26,12,26,0,0);
+        Timestamp timestamp2 = new Timestamp(timestamp1.getTime()).setSeconds(timestamp1.getSeconds() + 1);timestamp1.setSeconds(timestamp1.getSeconds() + 1);
+        List<Optional<RegisterEvents>> registerEvents = registerEventsRepository.getEvents(101310,);
         String staffName = "";
-        if (registerEvents.isPresent()) {
-            Integer staff_id = registerEvents.get().getStaffId();
+        if (registerEvents.get(0).isPresent()) {
+            Integer staff_id = registerEvents.get(0).get().getStaffId();
             staffName = staffRepository.findById(staff_id).get().getShortFio();
+            sendToPrint(new Person(staffName, timestamp));
         }
-        sendToPrint(new Person("Имя", new Date()));
         return true;
     }
 
-    boolean sendToPrint(Person person) throws IOException {
+    public boolean sendToPrint(Person person) throws IOException {
 
         PrinterJob job = PrinterJob.getPrinterJob();
         PageFormat format = job.defaultPage();
         Paper paper = new Paper();
 
-        double paperWidth = 3.15 * 72.0; // Ширина бумаги в пунктах (1 дюйм = 72 пункта)
+        double paperWidth = 10 * 72.0; // Ширина бумаги в пунктах (1 дюйм = 72 пункта)
         double paperHeight = 10.0 * 72.0; // Высота бумаги в пунктах (1 дюйм = 72 пункта)
 
         paper.setSize(paperWidth, paperHeight);
         paper.setImageableArea(0.0, 0.0, paperWidth, paperHeight);
 
-        File image = new File("src/main/resources/moika22_logo_w.png");
-        BufferedImage bufferedImage = ImageIO.read(image);
-        System.out.println(bufferedImage.toString());
         format.setPaper(paper);
 
         job.setPrintable(new Printable() {
@@ -70,12 +73,7 @@ public class MainService {
 
                 g2d.setFont(font);
 
-                int imageWidth = bufferedImage.getWidth(null);
-                int imageHeight = bufferedImage.getHeight(null);
-                int x = (int) ((pf.getImageableWidth() - imageWidth) / 2);
-                int y = (int) ((pf.getImageableHeight() - imageHeight) / 2);
-                g2d.drawImage(bufferedImage, x, y, null);
-                g2d.drawString(person.getName(), 0, 20);
+                g2d.drawString(person.getName(), -10, 20);
                 g2d.drawString(person.getDate().toString(), 0, 40);
                 return PAGE_EXISTS;
             }

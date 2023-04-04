@@ -9,8 +9,8 @@ import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Entity
-@Table(name = "STAFF")
+@Entity(name = "STAFF")
+@Table
 @Data
 public class Staff {
 
@@ -18,9 +18,10 @@ public class Staff {
     }
 
     @Id
+    @Column(name = "ID_STAFF")
     private Integer id;
     @Column(name = "LAST_NAME", columnDefinition = "VARCHAR(255)")
-    private Integer lastName;
+    private String lastName;
     @Column(name = "FIRST_NAME", columnDefinition = "VARCHAR(255)")
     private String firstName;
     @Column(name = "MIDDLE_NAME", columnDefinition = "VARCHAR(255)")

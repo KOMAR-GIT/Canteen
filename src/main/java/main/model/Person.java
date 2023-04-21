@@ -7,12 +7,12 @@ import java.util.Date;
 @Data
 public class Person {
 
-    public Person(String name, Date date) {
+    public Person(String name, String date) {
         this.name = name;
         this.date = date;
     }
 
     private String name;
-    private Date date;
+    private String date;
 
 }

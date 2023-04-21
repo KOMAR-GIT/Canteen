@@ -13,11 +13,8 @@ import java.awt.print.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -31,46 +28,65 @@ public class MainService {
         this.staffRepository = staffRepository;
     }
 
-    //Получаем данные человека, которому нужно распечатать чек
-    public void getPrintablePerson(List<RegisterEvents> printedEvents, Timestamp timestamp) throws IOException, PrinterException, ParseException {
-        List<RegisterEvents> localPrintedEvents = printedEvents;
-        List<RegisterEvents> registerEvents = registerEventsRepository.getEvents();
+    public void getPrintablePerson(List<RegisterEvents> printedEvents, Timestamp timestamp) throws IOException {
+        List<RegisterEvents> registerEvents = registerEventsRepository.getEvents(getCorrectTimestamp(timestamp, true));
+        System.out.println(timestamp);
         if (!registerEvents.isEmpty()) {
-            registerEvents.sort(Comparator.comparingInt(RegisterEvents::getIdReg));
-            registerEvents = registerEvents.subList(registerEvents.size() - 5, registerEvents.size());
             for (RegisterEvents registerEvent : registerEvents) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                Date parsedDate = dateFormat.parse(registerEvent.getLastTimestamp());
-                Timestamp timestampFromDataBase = new Timestamp(parsedDate.getTime());
-                boolean needToPrint = false;
-                synchronized (localPrintedEvents) {
-                    if (!localPrintedEvents.contains(registerEvent)) {
-                        localPrintedEvents.add(registerEvent);
-                        needToPrint = true;
-                    }
-                }
-                if (needToPrint && timestampFromDataBase.after(getCorrectTimestamp(timestamp, true))) {
+                if (!printedEvents.contains(registerEvent)) {
+                    printedEvents.add(registerEvent);
                     Integer staff_id = registerEvent.getStaffId();
                     String staffName = staffRepository.findById(staff_id).get().getShortFio();
-                    sendToPrint(new Person(staffName, timestampFromDataBase));
-                    System.out.println("Печатаю " + staffName);
+                    Person person = new Person(staffName, registerEvent.getLastTimestamp());
+//                    sendToPrint(staffName, registerEvent.getLastTimestamp());
+                    System.out.println("Печатаю " + person.getName());
                 }
             }
         }
     }
 
-    private Timestamp getCorrectTimestamp(Timestamp timestamp, boolean addTenSecond) {
+    public boolean deleteOldEvents(){
+
+        return true;
+    }
+
+    //Получаем данные человека, которому нужно распечатать чек
+//    public void getPrintablePerson(List<RegisterEvents> printedEvents, Timestamp timestamp) throws IOException, PrinterException, ParseException {
+//        List<RegisterEvents> registerEvents = registerEventsRepository.getEvents();
+//        if (!registerEvents.isEmpty()) {
+//            registerEvents.sort(Comparator.comparingInt(RegisterEvents::getIdReg));
+//            registerEvents = registerEvents.subList(registerEvents.size() - 5, registerEvents.size());
+//            for (RegisterEvents registerEvent : registerEvents) {
+//                System.out.println(registerEvent.getLastTimestamp());
+//                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+//                Date parsedDate = dateFormat.parse(registerEvent.getLastTimestamp());
+//                Timestamp timestampFromDataBase = new Timestamp(parsedDate.getTime());
+//                System.out.println("Проверяю, что " + timestampFromDataBase + " идет после " + getCorrectTimestamp(timestamp, true));
+//                if (!printedEvents.contains(registerEvent)
+//                        && timestampFromDataBase.after(getCorrectTimestamp(timestamp, true))) {
+//                    System.out.println("зашел в условие");
+//                    printedEvents.add(registerEvent);
+//                    Integer staff_id = registerEvent.getStaffId();
+//                    String staffName = staffRepository.findById(staff_id).get().getShortFio();
+//                    sendToPrint(new Person(staffName, timestampFromDataBase));
+//                    System.out.println("Печатаю " + staffName);
+//                }
+//            }
+//        }
+//    }
+
+    private String getCorrectTimestamp(Timestamp timestamp, boolean addTenSecond) {
         Timestamp finalTimestamp;
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timestamp.getTime());
         if (addTenSecond) {
-            calendar.add(Calendar.SECOND, -10);
+            calendar.add(Calendar.SECOND, -1000);
         }
         finalTimestamp = new Timestamp(calendar.getTime().getTime());
-        return finalTimestamp;
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(finalTimestamp);
     }
 
-    public boolean sendToPrint(Person person) throws IOException, PrinterException {
+    public boolean sendToPrint(Person person) throws IOException {
         PrinterJob printerJob = PrinterJob.getPrinterJob();
         PageFormat pageFormat = printerJob.defaultPage();
         ClassLoader cl = getClass().getClassLoader();
@@ -97,11 +113,15 @@ public class MainService {
             g2d.drawImage(image1, 0, 0, imageWidth, imageHeight, null);
             g2d.drawString("Добро пожаловать, ", 0, y + 10);
             g2d.drawString(person.getName() + "!", 0, y + 20);
-            g2d.drawString(person.getDate().toString(), 0, y + 30);
+            g2d.drawString(person.getDate(), 0, y + 30);
             return Printable.PAGE_EXISTS;
         };
         printerJob.setPrintable(printable, pageFormat); // установка параметров печати
-        printerJob.print(); // запуск печати
+        try {
+            printerJob.print(); // запуск печати
+        } catch (PrinterException e) {
+            System.out.println("Ошибка печати");
+        }
 
         return true;
     }

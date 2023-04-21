@@ -38,7 +38,7 @@ public class MainService {
                     Integer staff_id = registerEvent.getStaffId();
                     String staffName = staffRepository.findById(staff_id).get().getShortFio();
                     Person person = new Person(staffName, registerEvent.getLastTimestamp());
-//                    sendToPrint(staffName, registerEvent.getLastTimestamp());
+                    sendToPrint(person);
                     System.out.println("Печатаю " + person.getName());
                 }
             }
@@ -80,7 +80,7 @@ public class MainService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timestamp.getTime());
         if (addTenSecond) {
-            calendar.add(Calendar.SECOND, -1000);
+            calendar.add(Calendar.SECOND, -4);
         }
         finalTimestamp = new Timestamp(calendar.getTime().getTime());
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(finalTimestamp);

@@ -10,6 +10,7 @@ import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,29 +27,18 @@ public class Main {
 
         // Создаем экземпляр Timer
         Timer timer = new Timer();
-        Calendar today = Calendar.getInstance();
-        today.set(Calendar.HOUR_OF_DAY, 18);
-        today.set(Calendar.MINUTE, 0);
-        today.set(Calendar.SECOND, 0);
-
-        // Задаем время первого запуска метода deleteRegs() (в 6 вечера сегодня)
-        if (today.getTimeInMillis() < System.currentTimeMillis()) {
-            today.add(Calendar.DAY_OF_MONTH, 1);
-            System.out.println(today.getTime());
-        }
-
-        // Задаем период запуска метода deleteRegs() (24 часа)
-        long period = 24 * 60 * 60 * 1000;
+        LocalTime timeToRun = LocalTime.of(18,0);
 
         // Запускаем метод deleteRegs() каждый день в 6 вечера
-        timer.scheduleAtFixedRate(new TimerTask() {
+       TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 service.deleteOldEvents();
             }
-        }, today.getTime(), period);
+        };
 
         while (true) {
+            LocalTime now = LocalTime.now();
             service.getPrintablePerson(printedEvents, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             if (printedEvents.size() > 20) printedEvents.clear();
         }

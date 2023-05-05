@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -22,58 +23,44 @@ public class MainService {
 
     private final RegisterEventsRepository registerEventsRepository;
     private final StaffRepository staffRepository;
+    private Integer personsCount;
+    private final List<RegisterEvents> printedEvents;
 
     public MainService(StaffRepository staffRepository, RegisterEventsRepository registerEventsRepository) {
         this.registerEventsRepository = registerEventsRepository;
         this.staffRepository = staffRepository;
+        personsCount = 0;
+        printedEvents = new ArrayList<>();
     }
 
-    public void getPrintablePerson(List<RegisterEvents> printedEvents, Timestamp timestamp) throws IOException {
+    public void getPrintablePerson(Timestamp timestamp) throws IOException {
+        //получаем список приложивших карточку к валидатору в столовой за последние 4 секунды
         List<RegisterEvents> registerEvents = registerEventsRepository.getEvents(getCorrectTimestamp(timestamp, true));
-        System.out.println(timestamp);
         if (!registerEvents.isEmpty()) {
             for (RegisterEvents registerEvent : registerEvents) {
+                //Если записи нет в printedEvents, значит печатаем
                 if (!printedEvents.contains(registerEvent)) {
-                    printedEvents.add(registerEvent);
-                    Integer staff_id = registerEvent.getStaffId();
-                    String staffName = staffRepository.findById(staff_id).get().getShortFio();
+                    printedEvents.add(registerEvent); //добавляем в список распечатанных
+                    Integer staff_id = registerEvent.getStaffId(); //получаем id сотрудника
+                    String staffName = staffRepository.findById(staff_id).get().getShortFio(); // находим в бд по id имя сотрудника
                     Person person = new Person(staffName, registerEvent.getLastTimestamp());
-                    sendToPrint(person);
-                    System.out.println("Печатаю " + person.getName());
+                    personsCount++; // Добавляем единицу к счетчику посетителей за сегодня
+                    sendToPrint(person); // печатаем чек
+                    System.out.println("Печатаю " + person.getName() + ". Он " + personsCount + " за сегодня");
                 }
             }
         }
+        if (printedEvents.size() > 20) printedEvents.clear();
     }
 
-    public boolean deleteOldEvents(){
-
-        return true;
+    public void deleteOldEvents() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.YEAR, -1);
+        System.out.println("Удаление записей до: " +
+                getCorrectTimestamp(new Timestamp(calendar.getTimeInMillis()), false));
+        registerEventsRepository.clearOldEvents(
+                getCorrectTimestamp(new Timestamp(calendar.getTimeInMillis()), false));
     }
-
-    //Получаем данные человека, которому нужно распечатать чек
-//    public void getPrintablePerson(List<RegisterEvents> printedEvents, Timestamp timestamp) throws IOException, PrinterException, ParseException {
-//        List<RegisterEvents> registerEvents = registerEventsRepository.getEvents();
-//        if (!registerEvents.isEmpty()) {
-//            registerEvents.sort(Comparator.comparingInt(RegisterEvents::getIdReg));
-//            registerEvents = registerEvents.subList(registerEvents.size() - 5, registerEvents.size());
-//            for (RegisterEvents registerEvent : registerEvents) {
-//                System.out.println(registerEvent.getLastTimestamp());
-//                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-//                Date parsedDate = dateFormat.parse(registerEvent.getLastTimestamp());
-//                Timestamp timestampFromDataBase = new Timestamp(parsedDate.getTime());
-//                System.out.println("Проверяю, что " + timestampFromDataBase + " идет после " + getCorrectTimestamp(timestamp, true));
-//                if (!printedEvents.contains(registerEvent)
-//                        && timestampFromDataBase.after(getCorrectTimestamp(timestamp, true))) {
-//                    System.out.println("зашел в условие");
-//                    printedEvents.add(registerEvent);
-//                    Integer staff_id = registerEvent.getStaffId();
-//                    String staffName = staffRepository.findById(staff_id).get().getShortFio();
-//                    sendToPrint(new Person(staffName, timestampFromDataBase));
-//                    System.out.println("Печатаю " + staffName);
-//                }
-//            }
-//        }
-//    }
 
     private String getCorrectTimestamp(Timestamp timestamp, boolean addTenSecond) {
         Timestamp finalTimestamp;
@@ -90,15 +77,21 @@ public class MainService {
         PrinterJob printerJob = PrinterJob.getPrinterJob();
         PageFormat pageFormat = printerJob.defaultPage();
         ClassLoader cl = getClass().getClassLoader();
+
+        // пытаемся получить эмблему отеля
         InputStream stream = cl.getResourceAsStream("/moika22_logo_w.png");
         if (stream == null) System.err.println("resource not found");
         BufferedImage bufferedImage = ImageIO.read(stream);
+
+        //Выставляем размеры листа печати
         Paper paper = pageFormat.getPaper();
         double width = 3.15 * 72; // ширина страницы в дюймах и перевод в пиксели
         double height = 11.69 * 72; // высота страницы в дюймах и перевод в пиксели
         paper.setSize(width, height);
         paper.setImageableArea(0, 0, width, height);
         pageFormat.setPaper(paper);
+
+        //Прописываем, что и как печатаем на листе
         Printable printable = (graphics, pageFormat1, pageIndex) -> {
             if (pageIndex > 0) {
                 return Printable.NO_SUCH_PAGE;
@@ -114,6 +107,7 @@ public class MainService {
             g2d.drawString("Добро пожаловать, ", 0, y + 10);
             g2d.drawString(person.getName() + "!", 0, y + 20);
             g2d.drawString(person.getDate(), 0, y + 30);
+            g2d.drawString("Вы " + personsCount + " посетитель", 0, y + 40);
             return Printable.PAGE_EXISTS;
         };
         printerJob.setPrintable(printable, pageFormat); // установка параметров печати

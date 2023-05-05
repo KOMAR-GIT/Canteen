@@ -11,7 +11,6 @@ import java.util.List;
 @Repository
 public interface RegisterEventsRepository extends CrudRepository<RegisterEvents, Integer> {
 
-//    @Query(value = "SELECT ID_REG, STAFF_ID, LAST_TIMESTAMP FROM REG_EVENTS where AREAS_ID = 101310", nativeQuery = true)
     @Query(value = "SELECT ID_REG, STAFF_ID, LAST_TIMESTAMP FROM REG_EVENTS where AREAS_ID = 101310 and LAST_TIMESTAMP > :time", nativeQuery = true)
     List<RegisterEvents> getEvents(@Param("time") String timestamp);
 

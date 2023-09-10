@@ -33,8 +33,8 @@
         </dependency>
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
-            <artifactId>jaybird-jdk18</artifactId>
-            <version>3.0.8</version>
+            <artifactId>jaybird</artifactId>
+            <version>5.0.1.java8</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

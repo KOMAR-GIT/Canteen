@@ -39,18 +39,22 @@ public class MainService {
         if (!registerEvents.isEmpty()) {
             for (RegisterEvents registerEvent : registerEvents) {
                 //Если записи нет в printedEvents, значит печатаем
-                if (!printedEvents.contains(registerEvent)) {
+                if (!printedEvents.contains(registerEvent)
+                        && printedEvents.stream().noneMatch(n -> n.getStaffId().equals(registerEvent.getStaffId()))) {
                     printedEvents.add(registerEvent); //добавляем в список распечатанных
-                    Integer staff_id = registerEvent.getStaffId(); //получаем id сотрудника
-                    String staffName = staffRepository.findById(staff_id).get().getShortFio(); // находим в бд по id имя сотрудника
+                    Integer staffId = registerEvent.getStaffId(); //получаем id сотрудника
+                    String staffName = staffId != null
+                            ? staffRepository.findById(staffId).get().getShortFio()
+                            : "Неизвестный сотрудник"; // находим в бд по id имя сотрудника
                     Person person = new Person(staffName, registerEvent.getLastTimestamp());
-                    personsCount++; // Добавляем единицу к счетчику посетителей за сегодня
+                    // Добавляем единицу к счетчику посетителей за сегодня
+                    personsCount++;
                     sendToPrint(person); // печатаем чек
-                    System.out.println("Печатаю " + person.getName() + ". Он " + personsCount + " за сегодня");
+                    System.out.println("Печатаю " + person.getName() + " " + personsCount + " посетитель за сегодня");
                 }
             }
         }
-        if (printedEvents.size() > 20) printedEvents.clear();
+        if (printedEvents.size() > 10) printedEvents.clear();
     }
 
     public void deleteOldEvents() {
@@ -73,7 +77,7 @@ public class MainService {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(finalTimestamp);
     }
 
-    public boolean sendToPrint(Person person) throws IOException {
+    public void sendToPrint(Person person) throws IOException {
         PrinterJob printerJob = PrinterJob.getPrinterJob();
         PageFormat pageFormat = printerJob.defaultPage();
         ClassLoader cl = getClass().getClassLoader();
@@ -81,6 +85,7 @@ public class MainService {
         // пытаемся получить эмблему отеля
         InputStream stream = cl.getResourceAsStream("/moika22_logo_w.png");
         if (stream == null) System.err.println("resource not found");
+        assert stream != null;
         BufferedImage bufferedImage = ImageIO.read(stream);
 
         //Выставляем размеры листа печати
@@ -116,8 +121,6 @@ public class MainService {
         } catch (PrinterException e) {
             System.out.println("Ошибка печати");
         }
-
-        return true;
     }
 
 }

@@ -1,0 +1,17 @@
+.button
+{
+    -fx-background-color:  #323542;
+}
+.button:hover
+ {
+     -fx-background-color:  #43485a;
+ }
+.button:focused
+{
+    -fx-background-color:  #1d1f27;
+}
+.module
+{
+    -fx-background-color:  #323540;
+    -fx-background-radius: 10;
+}

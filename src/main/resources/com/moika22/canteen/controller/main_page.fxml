@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="500.0" prefWidth="750.0" style="-fx-background-color: #2b2f37;" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.moika22.canteen.controller.MainPageController">
+    <children>
+        <Pane layoutX="39.0" layoutY="81.0" prefHeight="150.0" prefWidth="364.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.leftAnchor="39.0" AnchorPane.rightAnchor="347.0">
+            <children>
+                <Label fx:id="name" layoutX="14.0" layoutY="14.0" prefHeight="61.0" prefWidth="103.0" text="Имя:" textFill="WHITE">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                    <opaqueInsets>
+                        <Insets />
+                    </opaqueInsets>
+                </Label>
+                <Label fx:id="eventTime" alignment="CENTER" layoutX="125.0" layoutY="75.0" prefHeight="61.0" prefWidth="224.0" textFill="WHITE" wrapText="true">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                    <opaqueInsets>
+                        <Insets />
+                    </opaqueInsets>
+                </Label>
+                <Label fx:id="eventTime1" layoutX="14.0" layoutY="75.0" prefHeight="61.0" prefWidth="103.0" text="Время записи:" textFill="WHITE" wrapText="true">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                    <opaqueInsets>
+                        <Insets />
+                    </opaqueInsets>
+                </Label>
+                <Label fx:id="name" alignment="CENTER" layoutX="125.0" layoutY="14.0" prefHeight="61.0" prefWidth="224.0" textFill="WHITE" wrapText="true">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                    <opaqueInsets>
+                        <Insets />
+                    </opaqueInsets>
+                </Label>
+            </children>
+            <effect>
+                <DropShadow height="40.0" radius="19.5" width="40.0">
+                    <color>
+                        <Color red="0.1315789520740509" green="0.1315789520740509" blue="0.1315789520740509" />
+                    </color>
+                </DropShadow>
+            </effect>
+        </Pane>
+        <Label fx:id="timer" alignment="CENTER_RIGHT" layoutX="537.0" layoutY="24.0" text="00:00" textAlignment="CENTER" textFill="WHITE" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="20.0">
+            <font>
+                <Font name="Carlito Bold" size="17.0" />
+            </font>
+        </Label>
+        <Label alignment="CENTER" layoutX="39.0" layoutY="41.0" prefHeight="40.0" prefWidth="364.0" text="Последняя печать" textFill="#dadada" AnchorPane.leftAnchor="39.0">
+            <font>
+                <Font name="Carlito Bold" size="15.0" />
+            </font>
+            <opaqueInsets>
+                <Insets />
+            </opaqueInsets>
+        </Label>
+        <Pane layoutX="430.0" layoutY="81.0" prefHeight="150.0" prefWidth="280.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.rightAnchor="40.0">
+            <children>
+                <Label fx:id="employeeCount" alignment="CENTER" layoutY="45.0" prefHeight="61.0" prefWidth="280.0" text="0" textFill="WHITE">
+                    <font>
+                        <Font name="Carlito Bold" size="24.0" />
+                    </font>
+                    <opaqueInsets>
+                        <Insets />
+                    </opaqueInsets>
+                </Label>
+            </children>
+            <effect>
+                <DropShadow height="40.0" radius="19.5" width="40.0">
+                    <color>
+                        <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                    </color>
+                </DropShadow>
+            </effect>
+        </Pane>
+        <Label alignment="CENTER" layoutX="458.0" layoutY="41.0" prefHeight="40.0" prefWidth="224.0" text="Количество посетителей" textFill="#dadada" AnchorPane.rightAnchor="68.0">
+            <font>
+                <Font name="Carlito Bold" size="15.0" />
+            </font>
+            <opaqueInsets>
+                <Insets />
+            </opaqueInsets>
+        </Label>
+        <Pane fx:id="status" layoutX="517.0" layoutY="402.0" opacity="0.0" prefHeight="90.0" prefWidth="90.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.bottomAnchor="40.0" AnchorPane.rightAnchor="40.0">
+            <effect>
+                <DropShadow height="40.0" radius="19.5" width="40.0">
+                    <color>
+                        <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                    </color>
+                </DropShadow>
+            </effect>
+            <children>
+                <ImageView fx:id="statusImage" fitHeight="90.0" fitWidth="90.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@../../../../static/img/running.gif" />
+                    </image>
+                </ImageView>
+            </children>
+        </Pane>
+    </children>
+    <opaqueInsets>
+        <Insets />
+    </opaqueInsets>
+</AnchorPane>

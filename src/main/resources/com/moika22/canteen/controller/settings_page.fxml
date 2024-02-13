@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="500.0" prefWidth="750.0" styleClass="background" stylesheets="@../../../../static/css/main_file.css" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.moika22.canteen.controller.SettingsPageController">
+    <children>
+        <Label layoutX="40.0" layoutY="41.0" text="Путь до папки с отчетами" textFill="#dadada" AnchorPane.leftAnchor="40.0">
+            <font>
+                <Font name="Carlito Bold" size="15.0" />
+            </font>
+        </Label>
+        <Label fx:id="lb" layoutX="40.0" layoutY="228.0" text="Расписание работы программы" textFill="#dadada" AnchorPane.leftAnchor="40.0">
+            <font>
+                <Font name="Carlito Bold" size="15.0" />
+            </font>
+        </Label>
+        <Pane layoutX="40.0" layoutY="264.0" prefHeight="150.0" prefWidth="200.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.leftAnchor="40.0">
+            <effect>
+                <DropShadow height="40.0" radius="19.5" width="40.0">
+                    <color>
+                        <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                    </color>
+                </DropShadow>
+            </effect>
+            <children>
+                <Button fx:id="programmScheduleSaveButton" alignment="CENTER" focusTraversable="false" layoutX="40.0" layoutY="108.0" mnemonicParsing="false" onAction="#ScheduleSaveButtonClicked" prefHeight="28.0" prefWidth="120.0" styleClass="save-button" stylesheets="@../../../../static/css/main_file.css" text="Сохранить" textFill="WHITE">
+                    <effect>
+                        <DropShadow height="30.0" radius="14.5" width="30.0">
+                            <color>
+                                <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                            </color>
+                        </DropShadow>
+                    </effect>
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </Button>
+                <TextField fx:id="startTimeTextField" alignment="CENTER" layoutX="15.0" layoutY="56.0" prefHeight="35.0" prefWidth="75.0" styleClass="settings-text-field" stylesheets="@../../../../static/css/main_file.css" text="00:00">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </TextField>
+                <Label fx:id="lb1" alignment="CENTER" contentDisplay="CENTER" layoutX="18.0" layoutY="22.0" prefHeight="25.0" prefWidth="70.0" text="Начало" textFill="WHITE">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </Label>
+                <Label fx:id="lb11" alignment="CENTER" layoutX="113.0" layoutY="22.0" prefHeight="25.0" prefWidth="70.0" text="Конец" textFill="WHITE">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="endTimeTextField" alignment="CENTER" layoutX="110.0" layoutY="56.0" prefHeight="35.0" prefWidth="75.0" styleClass="settings-text-field" stylesheets="@../../../../static/css/main_file.css" text="00:00">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </TextField>
+            </children>
+        </Pane>
+        <Pane layoutX="40.0" layoutY="72.0" prefHeight="45.0" prefWidth="641.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0">
+            <effect>
+                <DropShadow height="40.0" radius="19.5" width="40.0">
+                    <color>
+                        <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                    </color>
+                </DropShadow>
+            </effect>
+            <children>
+                <Button fx:id="saveReportsPathButton" focusTraversable="false" layoutX="536.0" layoutY="9.0" mnemonicParsing="false" onAction="#saveReportsPathButtonClicked" prefHeight="28.0" prefWidth="120.0" styleClass="save-button" stylesheets="@../../../../static/css/main_file.css" text="Сохранить" textFill="WHITE">
+                    <effect>
+                        <DropShadow height="30.0" radius="14.5" width="30.0">
+                            <color>
+                                <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                            </color>
+                        </DropShadow>
+                    </effect>
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </Button>
+                <TextField fx:id="reportPathTextField" alignment="CENTER" layoutX="7.0" layoutY="6.0" prefHeight="35.0" prefWidth="518.0" styleClass="settings-text-field" stylesheets="@../../../../static/css/main_file.css" text="root">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </TextField>
+            </children>
+        </Pane>
+        <Label fx:id="lb2" layoutX="496.0" layoutY="228.0" text="Время удаления старых ивентов" textFill="#dadada" AnchorPane.rightAnchor="40.0">
+            <font>
+                <Font name="Carlito Bold" size="15.0" />
+            </font>
+        </Label>
+        <Pane layoutX="510.0" layoutY="264.0" prefHeight="150.0" prefWidth="200.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.rightAnchor="40.0">
+            <effect>
+                <DropShadow height="40.0" radius="19.5" width="40.0">
+                    <color>
+                        <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                    </color>
+                </DropShadow>
+            </effect>
+            <children>
+                <Button fx:id="oldEventsSaveButton" alignment="CENTER" focusTraversable="false" layoutX="41.0" layoutY="108.0" mnemonicParsing="false" onAction="#oldEventsSaveButtonClicked" prefHeight="28.0" prefWidth="120.0" styleClass="save-button" stylesheets="@../../../../static/css/main_file.css" text="Сохранить" textFill="WHITE">
+                    <effect>
+                        <DropShadow height="30.0" radius="14.5" width="30.0">
+                            <color>
+                                <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                            </color>
+                        </DropShadow>
+                    </effect>
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </Button>
+                <TextField fx:id="oldEventsTimeTextField" alignment="CENTER" layoutX="17.0" layoutY="40.0" prefHeight="35.0" prefWidth="167.0" styleClass="settings-text-field" stylesheets="@../../../../static/css/main_file.css" text="00:00">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </TextField>
+            </children>
+        </Pane>
+        <Pane layoutX="40.0" layoutY="164.0" prefHeight="45.0" prefWidth="620.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0">
+            <effect>
+                <DropShadow height="40.0" radius="19.5" width="40.0">
+                    <color>
+                        <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                    </color>
+                </DropShadow>
+            </effect>
+            <children>
+                <Button fx:id="saveLogsLogButton" focusTraversable="false" layoutX="536.0" layoutY="9.0" mnemonicParsing="false" onAction="#saveLogsPathButtonClicked" prefHeight="28.0" prefWidth="120.0" styleClass="save-button" stylesheets="@../../../../static/css/main_file.css" text="Сохранить" textFill="WHITE">
+                    <effect>
+                        <DropShadow height="30.0" radius="14.5" width="30.0">
+                            <color>
+                                <Color red="0.13333334028720856" green="0.13333334028720856" blue="0.13333334028720856" />
+                            </color>
+                        </DropShadow>
+                    </effect>
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </Button>
+                <TextField fx:id="logsPathTextField" alignment="CENTER" layoutX="7.0" layoutY="6.0" prefHeight="35.0" prefWidth="518.0" styleClass="settings-text-field" stylesheets="@../../../../static/css/main_file.css" text="logs">
+                    <font>
+                        <Font name="Carlito Bold" size="15.0" />
+                    </font>
+                </TextField>
+            </children>
+        </Pane>
+        <Label layoutX="40.0" layoutY="132.0" text="Путь до папки с логами" textFill="#dadada" AnchorPane.leftAnchor="40.0">
+            <font>
+                <Font name="Carlito Bold" size="15.0" />
+            </font>
+        </Label>
+    </children>
+</AnchorPane>

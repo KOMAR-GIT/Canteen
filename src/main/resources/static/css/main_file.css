@@ -1,0 +1,56 @@
+.background {
+    -fx-background-color: #2b2f37;
+}
+
+.button {
+    -fx-background-color: #323542;
+}
+
+.button:hover {
+    -fx-background-color: #43485a;
+}
+
+.button:focused {
+    -fx-background-color: #1d1f27;
+}
+
+.module {
+    -fx-background-color: #323540;
+    -fx-background-radius: 10;
+}
+
+.console {
+    -fx-control-inner-background: #21252a;
+    -fx-region-background: #21252a;
+    -fx-text-fill: white;
+}
+
+.console .content {
+    -fx-background-radius: 0;
+}
+
+.settings-text-field {
+    -fx-background-color: #323540;
+    -fx-border-radius: 10;
+    -fx-control-inner-background: #21252a;
+    -fx-region-background: #21252a;
+    -fx-text-fill: white;
+    -fx-border-color: #222222
+}
+
+.settings-text-field-wrong-data {
+    -fx-background-color: #323540;
+    -fx-border-radius: 10;
+    -fx-control-inner-background: #21252a;
+    -fx-region-background: #21252a;
+    -fx-text-fill: white;
+    -fx-border-color: #8c1818
+}
+
+.save-button {
+    -fx-background-color: #323542;
+}
+
+.save-button:pressed {
+    -fx-background-color: #1d1f27;
+}

@@ -3,7 +3,7 @@ package com.moika22.canteen.service;
 import com.moika22.canteen.ApplicationProperties;
 import com.moika22.canteen.ReportBuilder;
 import com.moika22.canteen.api.LastEmployee;
-import com.moika22.canteen.model.RegisterEvents;
+import com.moika22.canteen.model.RegisterEvent;
 import com.moika22.canteen.model.Staff;
 import com.moika22.canteen.repository.RegisterEventsRepository;
 import com.moika22.canteen.repository.StaffRepository;
@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
-import javax.print.attribute.AttributeSet;
-import javax.print.attribute.standard.PrinterState;
-import javax.transaction.Transactional;
+import javax.print.attribute.Attribute;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.print.*;
@@ -33,11 +31,14 @@ public class MainService {
     private final RegisterEventsRepository registerEventsRepository;
     private final StaffRepository staffRepository;
     private Integer personsCount;
-    private final List<RegisterEvents> printedEvents;
+    private final List<RegisterEvent> printedEvents;
     private final Map<String, Integer> persons;
     private boolean isProgramRunning;
     private final ApplicationProperties applicationProperties;
     private String lastTimestamp;
+    private final double WIDTH; // ширина страницы в дюймах и перевод в пиксели
+    private final double HEIGHT;// высота страницы в дюймах и перевод в пиксели
+
 
     public MainService(StaffRepository staffRepository,
                        RegisterEventsRepository registerEventsRepository,
@@ -49,15 +50,15 @@ public class MainService {
         personsCount = 0;
         printedEvents = new ArrayList<>();
         isProgramRunning = false;
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, -30);
-        lastTimestamp = getCorrectTimestamp(new Timestamp(calendar.getTimeInMillis()));
+        getStartTimestamp();
+        WIDTH = 226.8;
+        HEIGHT = 841.68;
     }
 
 
     public LastEmployee getPrintablePerson() {
         //получаем список последних приложивших карточку к валидатору в столовой
-        List<RegisterEvents> registerEvents;
+        List<RegisterEvent> registerEvents;
         try {
             registerEvents = registerEventsRepository.getEvents(lastTimestamp);
         } catch (Exception e) {
@@ -67,7 +68,7 @@ public class MainService {
         }
 
         LastEmployee lastEmployee = null;
-        for (RegisterEvents registerEvent : registerEvents) {
+        for (RegisterEvent registerEvent : registerEvents) {
 
             String staffName = "Неизвестный сотрудник";
             Integer staffId = registerEvent.getStaffId(); //получаем id сотрудника
@@ -99,7 +100,7 @@ public class MainService {
 
                 lastTimestamp = registerEvent.getLastTimestamp();
             }
-            if (printedEvents.size() > 10) printedEvents.clear();
+            if (printedEvents.size() > 10) printedEvents.remove(0);
         }
         return lastEmployee;
 
@@ -124,12 +125,24 @@ public class MainService {
     }
 
     private boolean sendToPrint(LastEmployee person) {
+        PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null,null);
         PrinterJob printerJob = PrinterJob.getPrinterJob();
+        for(PrintService printService : printServices){
+            if(printService.getName().contains("Canteen")){
+                for(Attribute attribute : printService.getAttributes().toArray()){
+                    log.info(attribute.getName());
+                }
+                try {
+                    printerJob.setPrintService(printService);
+                } catch (PrinterException e) {
+                    log.error(e.getMessage());
+                }
+            }
+        }
         PageFormat pageFormat = printerJob.defaultPage();
         ClassLoader cl = getClass().getClassLoader();
 
-        // пытаемся получить эмблему отеля
-
+        // Попытка получить эмблему отеля
         BufferedImage bufferedImage;
         try {
             InputStream stream = cl.getResourceAsStream("static/img/moika22_logo_w.png");
@@ -139,25 +152,32 @@ public class MainService {
             return false;
         }
 
-        //Выставляем размеры листа печати
+        //Настройка размеров листа печати
         Paper paper = pageFormat.getPaper();
-        // ширина страницы в дюймах и перевод в пиксели
-        double WIDTH = 226.8;
-        // высота страницы в дюймах и перевод в пиксели
-        double HEIGHT = 841.68;
         paper.setSize(WIDTH, HEIGHT);
         paper.setImageableArea(0, 0, WIDTH, HEIGHT);
         pageFormat.setPaper(paper);
 
-        //Прописываем, что и как печатаем на листе
-        Printable printable = (graphics, pageFormat1, pageIndex) -> {
+        printerJob.setPrintable(getPage(bufferedImage, person), pageFormat); // установка параметров печати
+        try {
+            printerJob.print(); // запуск печати
+        } catch (PrinterException e) {
+            log.error("Ошибка печати");
+            return false;
+        }
+        return true;
+    }
+
+    //Создание страницы
+    private Printable getPage(BufferedImage logo, LastEmployee person) {
+        return (graphics, pageFormat1, pageIndex) -> {
             if (pageIndex > 0) {
                 return Printable.NO_SUCH_PAGE;
             }
             Graphics2D g2d = (Graphics2D) graphics;
             g2d.translate(pageFormat1.getImageableX(), pageFormat1.getImageableY());
             g2d.setFont(new Font("Courier New", Font.BOLD, 11));
-            Image image1 = bufferedImage.getScaledInstance(200, 100, Image.SCALE_DEFAULT);
+            Image image1 = logo.getScaledInstance(200, 100, Image.SCALE_DEFAULT);
             int imageWidth = image1.getWidth(null);
             int imageHeight = image1.getHeight(null);
             int y = 100;
@@ -168,14 +188,6 @@ public class MainService {
             g2d.drawString("Вы " + personsCount + " посетитель", 0, y + 40);
             return Printable.PAGE_EXISTS;
         };
-        printerJob.setPrintable(printable, pageFormat); // установка параметров печати
-        try {
-            printerJob.print(); // запуск печати
-        } catch (PrinterException e) {
-            log.error("Ошибка печати");
-            return false;
-        }
-        return true;
     }
 
     public boolean isProgramRunning() {
@@ -196,5 +208,16 @@ public class MainService {
 
     public LocalTime getDeleteOldEventsTime() {
         return LocalTime.parse(applicationProperties.getProperty("time.old-events"));
+    }
+
+    public void getStartTimestamp(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, -30);
+        lastTimestamp = getCorrectTimestamp(new Timestamp(calendar.getTimeInMillis()));
+    }
+    public void clear() {
+        personsCount = 0;
+        printedEvents.clear();
+        getStartTimestamp();
     }
 }

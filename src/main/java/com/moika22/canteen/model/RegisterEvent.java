@@ -8,9 +8,9 @@ import java.io.Serializable;
 @Entity(name = "REG_EVENTS")
 @Table
 @Data
-public class RegisterEvents implements Serializable {
+public class RegisterEvent implements Serializable {
 
-    public RegisterEvents() {
+    public RegisterEvent() {
     }
 
     @Id

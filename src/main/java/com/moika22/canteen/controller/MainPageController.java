@@ -92,11 +92,14 @@ public class MainPageController implements Initializable {
                     service.setProgramRunning(true);
                     getLastEmployee();
                     log.info("Программа начала работу");
-                } else if (timeNow.equals(service.getDeleteOldEventsTime())) {
+                } else if (timeNow.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                        .equals(service.getDeleteOldEventsTime().toString())) {
                     service.deleteOldEvents();
                     log.info("Удалены старые ивенты");
-                } else if (timeNow.equals(LocalTime.MIDNIGHT)) {
+                } else if (timeNow.format(DateTimeFormatter.ofPattern("HH:mm"))
+                        .equals(LocalTime.MIDNIGHT.toString())) {
                     service.createReport(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+                    service.clear();
                 }
                 Platform.runLater(() -> {
                     timer.setText(timeNow.format(formatter));

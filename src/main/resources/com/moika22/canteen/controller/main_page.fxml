@@ -93,7 +93,7 @@
                 <Insets />
             </opaqueInsets>
         </Label>
-        <Pane fx:id="status" layoutX="517.0" layoutY="402.0" opacity="0.0" prefHeight="90.0" prefWidth="90.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.bottomAnchor="40.0" AnchorPane.rightAnchor="40.0">
+        <Pane fx:id="status" layoutX="517.0" layoutY="402.0" prefHeight="90.0" prefWidth="90.0" styleClass="module" stylesheets="@../../../../static/css/main_file.css" AnchorPane.bottomAnchor="40.0" AnchorPane.rightAnchor="40.0">
             <effect>
                 <DropShadow height="40.0" radius="19.5" width="40.0">
                     <color>

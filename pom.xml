@@ -25,6 +25,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.2.4.RELEASE</version>
                 <configuration>
                     <mainClass>com.moika22.canteen.Main</mainClass>
                 </configuration>
@@ -68,6 +69,14 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.20</version>
+        </dependency>
+
+        <!--Test-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>3.2.2</version>
+            <scope>test</scope>
         </dependency>
 
         <!--javafx-->

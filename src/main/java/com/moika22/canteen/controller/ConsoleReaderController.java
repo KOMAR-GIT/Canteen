@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
+import lombok.extern.slf4j.Slf4j;
 import net.rgielen.fxweaver.core.FxmlView;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component
 @FxmlView("console_reader.fxml")
+@Slf4j
 public class ConsoleReaderController implements Initializable {
 
     @FXML
@@ -66,7 +68,7 @@ public class ConsoleReaderController implements Initializable {
                     }
                 }
             } catch (IOException ex) {
-                throw new UncheckedIOException(ex);
+                log.error(ex.getMessage());
             }
         }
 

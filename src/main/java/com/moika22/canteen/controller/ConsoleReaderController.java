@@ -32,7 +32,6 @@ public class ConsoleReaderController implements Initializable {
         try {
             PipedInputStream in = new PipedInputStream();
             System.setOut(new PrintStream(new PipedOutputStream(in), true, UTF_8));
-
             Thread thread = new Thread(new StreamReader(in, area));
             thread.setDaemon(true);
             thread.start();
@@ -45,7 +44,6 @@ public class ConsoleReaderController implements Initializable {
 
         private final StringBuilder buffer = new StringBuilder();
         private boolean notify = true;
-
         private final BufferedReader reader;
         private final TextArea textArea;
 

@@ -21,7 +21,6 @@
 
 .console {
     -fx-control-inner-background: #21252a;
-    -fx-region-background: #21252a;
     -fx-text-fill: white;
 }
 
@@ -33,7 +32,6 @@
     -fx-background-color: #323540;
     -fx-border-radius: 10;
     -fx-control-inner-background: #21252a;
-    -fx-region-background: #21252a;
     -fx-text-fill: white;
     -fx-border-color: #222222
 }

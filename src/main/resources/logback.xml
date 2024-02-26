@@ -6,6 +6,9 @@
             <charset>UTF-8</charset>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -17,12 +20,15 @@
             <!-- Keep 30 days' worth of history -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
         <encoder>
             <!-- Define log message format -->
             <pattern>%date %-5level [%thread] %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="INFO">
+    <root level="DEBUG">
         <!-- Reference the FILE appender -->
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>

@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class ReportBuilder {
@@ -40,7 +42,7 @@ public class ReportBuilder {
         headerCell.setCellValue("Количество посещений за сегодня");
         headerCell.setCellStyle(headerStyle);
 
-        int rowNumber = 2;
+        int rowNumber = 1;
 
         for (String employee : persons.keySet()) {
             Row row = sheet.createRow(rowNumber);
@@ -53,7 +55,8 @@ public class ReportBuilder {
         }
 
         try {
-            File file = new File(filePath);
+            Path path = Files.createFile(Path.of(filePath));
+            File file = new File(String.valueOf(path));
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             workbook.write(fileOutputStream);
             workbook.close();

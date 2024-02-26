@@ -48,24 +48,65 @@ public class MainPageController implements Initializable {
         timeNow();
     }
 
-
-    private void getLastEmployee() {
+    public void timeNow() {
         Thread thread = new Thread(() -> {
-            changeProgramStatusIcon(true);
-            while (service.isProgramRunning()) {
-                LastEmployee lastEmployee = service.getPrintablePerson();
-                if (lastEmployee != null) {
-                    Platform.runLater(() -> {
-                        name.setText(lastEmployee.getName());
-                        eventTime.setText(new SimpleDateFormat("HH:mm").format(new Date()));
-                        employeeCount.setText(String.valueOf(lastEmployee.getCount()));
-                    });
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    log.error(e.getMessage());
                 }
+
+                final LocalTime timeNow = LocalTime.now();
+
+                if (timeNow.isBefore(service.getStartTime()) || timeNow.isAfter(service.getEndTime())) {
+                    if (service.isProgramRunning()) {
+                        service.setProgramRunning(false);
+                    }
+                } else if (!service.isProgramRunning()) {
+                    getLastEmployee();
+                }
+
+                String time = timeNow.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+
+                if (time.equals(service.getDeleteOldEventsTime())) {
+                    service.deleteOldEvents();
+                    log.info("Удалены старые ивенты");
+                }
+
+                if (time.equals("00:00:00")) {
+                    service.createReport(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+                    service.clear();
+                }
+
+                Platform.runLater(() -> {
+                    timer.setText(timeNow.format(formatter));
+                });
             }
-            changeProgramStatusIcon(false);
-            log.info("Программа закончила работу");
         });
         thread.start();
+    }
+
+    private void getLastEmployee() {
+        service.setProgramRunning(true);
+        log.info("Программа начала работу");
+        changeProgramStatusIcon(true);
+        service.getPrintablePerson();
+        LastEmployee employee = new LastEmployee();
+        while (service.isProgramRunning()) {
+            LastEmployee lastEmployee = service.getLastEmployee();
+            if (!employee.equals(lastEmployee)) {
+                employee = lastEmployee;
+                Platform.runLater(() -> {
+                    name.setText(lastEmployee.getName());
+                    eventTime.setText(new SimpleDateFormat("HH:mm").format(new Date()));
+                    employeeCount.setText(String.valueOf(lastEmployee.getCount()));
+                });
+            }
+        }
+        changeProgramStatusIcon(false);
+        log.info("Программа закончила работу");
     }
 
     private void changeProgramStatusIcon(boolean isProgramRunning) {
@@ -76,36 +117,5 @@ public class MainPageController implements Initializable {
         }
     }
 
-    public void timeNow() {
-        Thread thread = new Thread(() -> {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
-                    log.error(e.getMessage());
-                }
-                final LocalTime timeNow = LocalTime.now();
-                if (timeNow.isBefore(service.getStartTime()) || timeNow.isAfter(service.getEndTime())) {
-                    service.setProgramRunning(false);
-                } else if (!service.isProgramRunning()) {
-                    service.setProgramRunning(true);
-                    getLastEmployee();
-                    log.info("Программа начала работу");
-                } else if (timeNow.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                        .equals(service.getDeleteOldEventsTime().toString())) {
-                    service.deleteOldEvents();
-                    log.info("Удалены старые ивенты");
-                } else if (timeNow.format(DateTimeFormatter.ofPattern("HH:mm"))
-                        .equals(LocalTime.MIDNIGHT.toString())) {
-                    service.createReport(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
-                    service.clear();
-                }
-                Platform.runLater(() -> {
-                    timer.setText(timeNow.format(formatter));
-                });
-            }
-        });
-        thread.start();
-    }
+
 }

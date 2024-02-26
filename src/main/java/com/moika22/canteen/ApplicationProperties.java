@@ -21,7 +21,6 @@ public class ApplicationProperties {
         try {
             System.out.println("Loading the properties file: " + filePath);
             configuration = new PropertiesConfiguration(filePath);
-            //Create new FileChangedReloadingStrategy to reload the properties file based on the given time interval
             FileChangedReloadingStrategy fileChangedReloadingStrategy = new FileChangedReloadingStrategy();
             configuration.setReloadingStrategy(fileChangedReloadingStrategy);
         } catch (ConfigurationException e) {

@@ -7,7 +7,7 @@
 
 <AnchorPane prefHeight="700.0" prefWidth="700.0" style="-fx-background-color: #2b2f37;" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.moika22.canteen.controller.ConsoleReaderController">
     <children>
-        <TextArea fx:id="consoleTextArea" editable="false" focusTraversable="false" layoutX="50.0" layoutY="50.0" prefHeight="400.0" prefWidth="500.0" styleClass="console" stylesheets="@../../../../static/css/main_file.css" wrapText="true" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="40.0">
+        <TextArea fx:id="consoleTextArea" editable="false" focusTraversable="false" layoutX="50.0" layoutY="50.0" prefHeight="400.0" prefWidth="500.0" style="-fx-region-background: #21252a;" styleClass="console" stylesheets="@../../../../static/css/main_file.css" wrapText="true" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="40.0">
             <effect>
                 <Glow />
             </effect>

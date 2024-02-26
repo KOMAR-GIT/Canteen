@@ -8,12 +8,10 @@ import com.moika22.canteen.model.Staff;
 import com.moika22.canteen.repository.RegisterEventsRepository;
 import com.moika22.canteen.repository.StaffRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
-import javax.print.attribute.Attribute;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.print.*;
@@ -39,13 +37,14 @@ public class MainService {
     private final double WIDTH; // ширина страницы в дюймах и перевод в пиксели
     private final double HEIGHT;// высота страницы в дюймах и перевод в пиксели
 
+    private LastEmployee lastEmployee;
 
     public MainService(StaffRepository staffRepository,
                        RegisterEventsRepository registerEventsRepository,
                        ApplicationProperties applicationProperties) {
         this.registerEventsRepository = registerEventsRepository;
         this.staffRepository = staffRepository;
-        this.persons = new HashMap<>();
+        this.persons = Collections.synchronizedMap(new HashMap<>());
         this.applicationProperties = applicationProperties;
         personsCount = 0;
         printedEvents = new ArrayList<>();
@@ -53,57 +52,52 @@ public class MainService {
         getStartTimestamp();
         WIDTH = 226.8;
         HEIGHT = 841.68;
+        lastEmployee = new LastEmployee("None", 0, "00:00");
     }
 
 
-    public LastEmployee getPrintablePerson() {
-        //получаем список последних приложивших карточку к валидатору в столовой
-        List<RegisterEvent> registerEvents;
-        try {
-            registerEvents = registerEventsRepository.getEvents(lastTimestamp);
-        } catch (Exception e) {
-            log.error(Arrays.toString(e.getStackTrace()));
-            log.error("Не удалось получить данные об ивентах из бд");
-            return null;
-        }
-
-        LastEmployee lastEmployee = null;
-        for (RegisterEvent registerEvent : registerEvents) {
-
-            String staffName = "Неизвестный сотрудник";
-            Integer staffId = registerEvent.getStaffId(); //получаем id сотрудника
-
-            if (staffId != null) {
-                //Проверка, не прикладывал ли этот сотрудник недавно карточку к валидатору
-                if (printedEvents.stream().anyMatch(n -> n.getStaffId().equals(registerEvent.getStaffId()))) {
-                    return null;
-                }
-                Optional<Staff> employee = staffRepository.findById(staffId);
-                if (employee.isPresent()) {
-                    staffName = employee.get().getShortFio(); // находим в бд по id имя сотрудника
-                }
+    @Async("taskExecutor")
+    public void getPrintablePerson() {
+        while (isProgramRunning) {
+            //Получение списка последних приложивших карточку к валидатору в столовой
+            List<RegisterEvent> registerEvents;
+            try {
+                registerEvents = registerEventsRepository.getEvents(lastTimestamp);
+            } catch (Exception e) {
+                log.error(Arrays.toString(e.getStackTrace()));
+                log.error("Не удалось получить данные об ивентах из бд");
+                continue;
             }
 
-            // Добавляем единицу к счетчику посетителей за сегодня
-            personsCount++;
-            lastEmployee = new LastEmployee(staffName, personsCount, registerEvent.getLastTimestamp());
-            if (sendToPrint(lastEmployee)) { // печатаем чек
+            for (RegisterEvent registerEvent : registerEvents) {
+                String staffName = "Неизвестный сотрудник";
+                Integer staffId = registerEvent.getStaffId(); //Получение id сотрудника
 
-                printedEvents.add(registerEvent); //добавляем в список распечатанных
-                log.info("Печатается чек для {}. {} посетитель за сегодня", lastEmployee.getName(), personsCount);
-
-                if (persons.containsKey(lastEmployee.getName())) {
-                    persons.merge(lastEmployee.getName(), 1, Integer::sum);
-                } else {
-                    persons.put(lastEmployee.getName(), 1);
+                if (staffId != null) {
+                    Optional<Staff> employee = staffRepository.findById(staffId);
+                    if (employee.isPresent()) {
+                        staffName = employee.get().getShortFio(); // Поиск имени сотрудника в бд по его id
+                    }
                 }
 
-                lastTimestamp = registerEvent.getLastTimestamp();
-            }
-            if (printedEvents.size() > 10) printedEvents.remove(0);
-        }
-        return lastEmployee;
+                // Добавление единицы к счетчику посетителей за сегодня
+                personsCount++;
+                lastEmployee = new LastEmployee(staffName, personsCount, registerEvent.getLastTimestamp());
+                if (sendToPrint(lastEmployee)) { // печатаем чек
 
+                    printedEvents.add(registerEvent); //добавляем в список распечатанных
+
+                    if (persons.containsKey(lastEmployee.getName())) {
+                        persons.merge(lastEmployee.getName(), 1, Integer::sum);
+                    } else {
+                        persons.put(lastEmployee.getName(), 1);
+                    }
+
+                    lastTimestamp = registerEvent.getLastTimestamp();
+                }
+                if (printedEvents.size() > 10) printedEvents.remove(0);
+            }
+        }
     }
 
     private String getCorrectTimestamp(Timestamp timestamp) {
@@ -125,20 +119,7 @@ public class MainService {
     }
 
     private boolean sendToPrint(LastEmployee person) {
-        PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null,null);
         PrinterJob printerJob = PrinterJob.getPrinterJob();
-        for(PrintService printService : printServices){
-            if(printService.getName().contains("Canteen")){
-                for(Attribute attribute : printService.getAttributes().toArray()){
-                    log.info(attribute.getName());
-                }
-                try {
-                    printerJob.setPrintService(printService);
-                } catch (PrinterException e) {
-                    log.error(e.getMessage());
-                }
-            }
-        }
         PageFormat pageFormat = printerJob.defaultPage();
         ClassLoader cl = getClass().getClassLoader();
 
@@ -165,6 +146,7 @@ public class MainService {
             log.error("Ошибка печати");
             return false;
         }
+        log.info("Печатается чек для {}. {} посетитель за сегодня", person.getName(), personsCount);
         return true;
     }
 
@@ -206,15 +188,20 @@ public class MainService {
         return LocalTime.parse(applicationProperties.getProperty("time.stop"));
     }
 
-    public LocalTime getDeleteOldEventsTime() {
-        return LocalTime.parse(applicationProperties.getProperty("time.old-events"));
+    public String getDeleteOldEventsTime() {
+        return applicationProperties.getProperty("time.old-events");
     }
 
-    public void getStartTimestamp(){
+    public void getStartTimestamp() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, -30);
         lastTimestamp = getCorrectTimestamp(new Timestamp(calendar.getTimeInMillis()));
     }
+
+    public LastEmployee getLastEmployee() {
+        return lastEmployee;
+    }
+
     public void clear() {
         personsCount = 0;
         printedEvents.clear();
